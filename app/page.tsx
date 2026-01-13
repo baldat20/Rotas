@@ -36,3 +36,7 @@ export default function Dashboard() {
     </main>
   )
 }
+
+useEffect(() => {
+  getDashboardData().then(setDados)
+}, [])
