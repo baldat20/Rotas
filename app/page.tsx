@@ -1,7 +1,5 @@
 "use client"
 
-"use client"
-
 import { useEffect, useState } from "react"
 
 import { SummaryCards } from "../components/SummaryCards"
@@ -13,7 +11,6 @@ import { Filtros } from "../components/Filtros"
 
 import { getDashboardData } from "../lib/api"
 
-
 export default function Dashboard() {
   // 🔹 Estados
   const [dados, setDados] = useState<any[]>([])
@@ -22,60 +19,52 @@ export default function Dashboard() {
   const [supervisorSelecionado, setSupervisorSelecionado] = useState("")
   const [data, setData] = useState("")
 
-  // 🔹 Busca dados da API
-useEffect(() => {
-  getDashboardData()
-    .then((data) => {
-      const normalizado = data.map((d: any) => ({
-        nome: d["Nome do Técnico"],
-        supervisor: d["Supervisor"],
+  // 🔹 Busca e NORMALIZA dados da API
+  useEffect(() => {
+    getDashboardData()
+      .then((data) => {
+        const normalizado = data.map((d: any) => ({
+          // 🔑 nomes usados pelos componentes
+          tecnico: d["Nome do Técnico"],
+          supervisor: d["Supervisor"],
 
-        agendado: Number(d["Agendado"]) || 0,
-        chegada: Number(d["Chegada no Local"]) || 0,
-        concluida: Number(d["Concluída"]) || 0,
-        despachado: Number(d["Despachado"]) || 0,
-        deslocamento: Number(d["Em deslocamento"]) || 0,
-        execucao: Number(d["Em execução"]) || 0,
+          agendado: Number(d["Agendado"]) || 0,
+          chegada: Number(d["Chegada no Local"]) || 0,
+          concluida: Number(d["Concluída"]) || 0,
+          despachado: Number(d["Despachado"]) || 0,
+          deslocamento: Number(d["Em deslocamento"]) || 0,
+          execucao: Number(d["Em execução"]) || 0,
 
-        total: Number(d["Total"]) || 0,
+          total: Number(d["Total geral"]) || 0,
+          meta: Number(d["Meta"]) || 0,
+          status: d["Status Técnico"] || "ATIVO"
+        }))
 
-        // temporários
-        meta: Number(d["Meta"]) || 0,
-        status: d["Status Técnico"] || "ATIVO"
-      }))
+        setDados(normalizado)
+      })
+      .finally(() => setLoading(false))
+  }, [])
 
-      setDados(normalizado)
-    })
-    .finally(() => setLoading(false))
-}, [])
-
-
-  // 🔹 Filtro por supervisor
+  // 🔹 Filtro por supervisor (já usando dados normalizados)
   const dadosFiltrados = supervisorSelecionado
-    ? dados.filter(d => d["Supervisor"] === supervisorSelecionado)
+    ? dados.filter(d => d.supervisor === supervisorSelecionado)
     : dados
 
   // 🔹 Produção total
   const totalGeral = dadosFiltrados.reduce(
-    (s, d) => s + (Number(d["Total"]) || 0),
+    (s, d) => s + d.total,
     0
   )
 
   // 🔹 Meta total (somente ATIVOS)
   const metaGeral = dadosFiltrados.reduce(
-    (s, d) =>
-      s +
-      (d["Status Técnico"] === "ATIVO"
-        ? Number(d["Meta"]) || 0
-        : 0),
+    (s, d) => s + (d.status === "ATIVO" ? d.meta : 0),
     0
   )
 
-  // 🔹 Técnicos fora da meta (somente ATIVOS)
+  // 🔹 Técnicos fora da meta
   const foraMeta = dadosFiltrados.filter(
-    d =>
-      d["Status Técnico"] === "ATIVO" &&
-      Number(d["Total"]) < Number(d["Meta"])
+    d => d.status === "ATIVO" && d.total < d.meta
   ).length
 
   // 🔹 Percentual de atingimento
@@ -86,7 +75,7 @@ useEffect(() => {
   // 🔹 Resumo consolidado por Supervisor
   const resumoPorSupervisor = Object.values(
     dados.reduce((acc: any, d: any) => {
-      const sup = d["Supervisor"] || "Sem Supervisor"
+      const sup = d.supervisor || "Sem Supervisor"
 
       if (!acc[sup]) {
         acc[sup] = {
@@ -97,15 +86,11 @@ useEffect(() => {
         }
       }
 
-      acc[sup].producao += Number(d["Total"]) || 0
+      acc[sup].producao += d.total
 
-      if (d["Status Técnico"] === "ATIVO") {
-        const metaTec = Number(d["Meta"]) || 0
-        acc[sup].meta += metaTec
-
-        if ((Number(d["Total"]) || 0) < metaTec) {
-          acc[sup].foraMeta += 1
-        }
+      if (d.status === "ATIVO") {
+        acc[sup].meta += d.meta
+        if (d.total < d.meta) acc[sup].foraMeta += 1
       }
 
       return acc
@@ -135,12 +120,10 @@ useEffect(() => {
         setData={setData}
       />
 
-      {/* 🟦 Cards + Gráfico por Supervisor */}
+      {/* 🟦 Cards */}
       {!supervisorSelecionado ? (
         <>
           <SummarySupervisorCards data={resumoPorSupervisor} />
-
-          {/* 📊 Produção x Meta por Supervisor */}
           <ProducaoSupervisorChart data={resumoPorSupervisor} />
         </>
       ) : (
@@ -153,10 +136,10 @@ useEffect(() => {
         />
       )}
 
-      {/* 📊 Gráfico Produção x Meta por Técnico */}
+      {/* 📊 Gráfico por Técnico */}
       <ProducaoChart data={dadosFiltrados} />
 
-      {/* 📋 Tabela por Técnico */}
+      {/* 📋 Tabela */}
       <TabelaTecnicos data={dadosFiltrados} />
     </main>
   )
