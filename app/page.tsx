@@ -6,6 +6,7 @@ import { SummaryCards } from "../components/SummaryCards"
 import { SummarySupervisorCards } from "../components/SummarySupervisorCards"
 import { ProducaoSupervisorChart } from "../components/ProducaoSupervisorChart"
 import { ProducaoChart } from "../components/ProducaoChart"
+import { StatusBarChart } from "../components/StatusBarChart"
 import { TabelaTecnicos } from "../components/TabelaTecnicos"
 import { Filtros } from "../components/Filtros"
 
@@ -31,7 +32,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [supervisorSelecionado, setSupervisorSelecionado] = useState("")
 
-  // 🔹 Busca dados da API (JÁ VALIDADOS PELO APP SCRIPT)
+  // 🔹 Busca dados da API (já tratados no Apps Script)
   useEffect(() => {
     getDashboardData()
       .then((data) => {
@@ -47,8 +48,6 @@ export default function Dashboard() {
           execucao: Number(d["Em execução"]) || 0,
 
           total: Number(d["Total geral"]) || 0,
-
-          // 👇 AGORA ESSES CAMPOS DEVEM VIR PRONTOS DO SCRIPT
           meta: Number(d["Meta"]) || 0,
           status: d["Status Técnico"] || "ATIVO"
         }))
@@ -58,13 +57,9 @@ export default function Dashboard() {
       .finally(() => setLoading(false))
   }, [])
 
-  // 🔹 Lista dinâmica de supervisores (sem duplicados)
+  // 🔹 Supervisores únicos
   const supervisores = Array.from(
-    new Set(
-      dados
-        .map(d => d.supervisor)
-        .filter(Boolean)
-    )
+    new Set(dados.map(d => d.supervisor).filter(Boolean))
   ).sort()
 
   // 🔹 Filtro por supervisor
@@ -72,29 +67,23 @@ export default function Dashboard() {
     ? dados.filter(d => d.supervisor === supervisorSelecionado)
     : dados
 
-  // 🔹 Produção total
-  const totalGeral = dadosFiltrados.reduce(
-    (s, d) => s + d.total,
-    0
-  )
+  // 🔹 Indicadores
+  const totalGeral = dadosFiltrados.reduce((s, d) => s + d.total, 0)
 
-  // 🔹 Meta total (considerando apenas ATIVOS)
   const metaGeral = dadosFiltrados.reduce(
     (s, d) => s + (d.status === "ATIVO" ? d.meta : 0),
     0
   )
 
-  // 🔹 Técnicos fora da meta
   const foraMeta = dadosFiltrados.filter(
     d => d.status === "ATIVO" && d.total < d.meta
   ).length
 
-  // 🔹 Percentual
   const percentual = metaGeral
     ? Math.round((totalGeral / metaGeral) * 100)
     : 0
 
-  // 🔹 Consolidação por Supervisor (cards + gráfico)
+  // 🔹 Consolidação por Supervisor
   const resumoPorSupervisor = Object.values(
     dados.reduce((acc: any, d) => {
       const sup = d.supervisor || "Sem Supervisor"
@@ -157,8 +146,11 @@ export default function Dashboard() {
         />
       )}
 
-      {/* 📊 Gráfico por Técnico */}
+      {/* 📊 Produção x Meta por Técnico */}
       <ProducaoChart data={dadosFiltrados} />
+
+      {/* 📊 Ordens por Técnico (Status) */}
+      <StatusBarChart data={dadosFiltrados} />
 
       {/* 📋 Tabela */}
       <TabelaTecnicos data={dadosFiltrados} />
