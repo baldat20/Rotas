@@ -1,13 +1,18 @@
 "use client"
 
+"use client"
+
 import { useEffect, useState } from "react"
-import { SummaryCards } from "@/components/SummaryCards"
-import { SummarySupervisorCards } from "@/components/SummarySupervisorCards"
-import { ProducaoSupervisorChart } from "@/components/ProducaoSupervisorChart"
-import { ProducaoChart } from "@/components/ProducaoChart"
-import { TabelaTecnicos } from "@/components/TabelaTecnicos"
-import { Filtros } from "@/components/Filtros"
-import { getDashboardData } from "@/lib/api"
+
+import { SummaryCards } from "../components/SummaryCards"
+import { SummarySupervisorCards } from "../components/SummarySupervisorCards"
+import { ProducaoSupervisorChart } from "../components/ProducaoSupervisorChart"
+import { ProducaoChart } from "../components/ProducaoChart"
+import { TabelaTecnicos } from "../components/TabelaTecnicos"
+import { Filtros } from "../components/Filtros"
+
+import { getDashboardData } from "../lib/api"
+
 
 export default function Dashboard() {
   // 🔹 Estados
