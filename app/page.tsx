@@ -58,3 +58,10 @@ const foraMeta = dadosFiltrados.filter(
 const percentual = metaGeral
   ? Math.round((totalGeral / metaGeral) * 100)
   : 0
+<SummaryCards
+  total={totalGeral}
+  meta={metaGeral}
+  percentual={percentual}
+  foraMeta={foraMeta}
+  supervisor={supervisorSelecionado}
+/>
