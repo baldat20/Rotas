@@ -37,7 +37,7 @@ useEffect(() => {
         deslocamento: Number(d["Em deslocamento"]) || 0,
         execucao: Number(d["Em execução"]) || 0,
 
-        total: Number(d["Total geral"]) || 0,
+        total: Number(d["Total"]) || 0,
 
         // temporários
         meta: Number(d["Meta"]) || 0,
@@ -57,7 +57,7 @@ useEffect(() => {
 
   // 🔹 Produção total
   const totalGeral = dadosFiltrados.reduce(
-    (s, d) => s + (Number(d["Total geral"]) || 0),
+    (s, d) => s + (Number(d["Total"]) || 0),
     0
   )
 
@@ -75,7 +75,7 @@ useEffect(() => {
   const foraMeta = dadosFiltrados.filter(
     d =>
       d["Status Técnico"] === "ATIVO" &&
-      Number(d["Total geral"]) < Number(d["Meta"])
+      Number(d["Total"]) < Number(d["Meta"])
   ).length
 
   // 🔹 Percentual de atingimento
@@ -97,13 +97,13 @@ useEffect(() => {
         }
       }
 
-      acc[sup].producao += Number(d["Total geral"]) || 0
+      acc[sup].producao += Number(d["Total"]) || 0
 
       if (d["Status Técnico"] === "ATIVO") {
         const metaTec = Number(d["Meta"]) || 0
         acc[sup].meta += metaTec
 
-        if ((Number(d["Total geral"]) || 0) < metaTec) {
+        if ((Number(d["Total"]) || 0) < metaTec) {
           acc[sup].foraMeta += 1
         }
       }
