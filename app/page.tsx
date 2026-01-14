@@ -92,3 +92,38 @@ export default function Dashboard() {
     </main>
   )
 }
+
+
+// 🔹 Agrupamento por Supervisor (cards consolidados)
+const resumoPorSupervisor = Object.values(
+  dados.reduce((acc: any, d: any) => {
+    const sup = d["Supervisor"] || "Sem Supervisor"
+
+    if (!acc[sup]) {
+      acc[sup] = {
+        supervisor: sup,
+        producao: 0,
+        meta: 0,
+        foraMeta: 0
+      }
+    }
+
+    acc[sup].producao += Number(d["Total geral"]) || 0
+
+    if (d["Status Técnico"] === "ATIVO") {
+      const metaTec = Number(d["Meta"]) || 0
+      acc[sup].meta += metaTec
+
+      if ((Number(d["Total geral"]) || 0) < metaTec) {
+        acc[sup].foraMeta += 1
+      }
+    }
+
+    return acc
+  }, {})
+).map((r: any) => ({
+  ...r,
+  percentual: r.meta
+    ? Math.round((r.producao / r.meta) * 100)
+    : 0
+}))
