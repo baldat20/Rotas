@@ -7,6 +7,7 @@ import { ProducaoChart } from "@/components/ProducaoChart"
 import { TabelaTecnicos } from "@/components/TabelaTecnicos"
 import { Filtros } from "@/components/Filtros"
 import { getDashboardData } from "@/lib/api"
+import { ProducaoSupervisorChart } from "@/components/ProducaoSupervisorChart"
 
 export default function Dashboard() {
   // 🔹 Estados
