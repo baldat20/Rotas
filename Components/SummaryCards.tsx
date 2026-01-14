@@ -1,3 +1,5 @@
+"use client"
+
 type Props = {
   total: number
   meta: number
