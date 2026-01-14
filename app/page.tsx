@@ -11,20 +11,31 @@ import { Filtros } from "../components/Filtros"
 
 import { getDashboardData } from "../lib/api"
 
+type Tecnico = {
+  tecnico: string
+  supervisor: string
+  agendado: number
+  chegada: number
+  concluida: number
+  despachado: number
+  deslocamento: number
+  execucao: number
+  total: number
+  meta: number
+  status: string
+}
+
 export default function Dashboard() {
   // 🔹 Estados
-  const [dados, setDados] = useState<any[]>([])
+  const [dados, setDados] = useState<Tecnico[]>([])
   const [loading, setLoading] = useState(true)
-
   const [supervisorSelecionado, setSupervisorSelecionado] = useState("")
-  const [data, setData] = useState("")
 
-  // 🔹 Busca e NORMALIZA dados da API
+  // 🔹 Busca dados da API (JÁ VALIDADOS PELO APP SCRIPT)
   useEffect(() => {
     getDashboardData()
       .then((data) => {
-        const normalizado = data.map((d: any) => ({
-          // 🔑 nomes usados pelos componentes
+        const normalizado: Tecnico[] = data.map((d: any) => ({
           tecnico: d["Nome do Técnico"],
           supervisor: d["Supervisor"],
 
@@ -36,6 +47,8 @@ export default function Dashboard() {
           execucao: Number(d["Em execução"]) || 0,
 
           total: Number(d["Total geral"]) || 0,
+
+          // 👇 AGORA ESSES CAMPOS DEVEM VIR PRONTOS DO SCRIPT
           meta: Number(d["Meta"]) || 0,
           status: d["Status Técnico"] || "ATIVO"
         }))
@@ -45,7 +58,16 @@ export default function Dashboard() {
       .finally(() => setLoading(false))
   }, [])
 
-  // 🔹 Filtro por supervisor (já usando dados normalizados)
+  // 🔹 Lista dinâmica de supervisores (sem duplicados)
+  const supervisores = Array.from(
+    new Set(
+      dados
+        .map(d => d.supervisor)
+        .filter(Boolean)
+    )
+  ).sort()
+
+  // 🔹 Filtro por supervisor
   const dadosFiltrados = supervisorSelecionado
     ? dados.filter(d => d.supervisor === supervisorSelecionado)
     : dados
@@ -56,7 +78,7 @@ export default function Dashboard() {
     0
   )
 
-  // 🔹 Meta total (somente ATIVOS)
+  // 🔹 Meta total (considerando apenas ATIVOS)
   const metaGeral = dadosFiltrados.reduce(
     (s, d) => s + (d.status === "ATIVO" ? d.meta : 0),
     0
@@ -67,14 +89,14 @@ export default function Dashboard() {
     d => d.status === "ATIVO" && d.total < d.meta
   ).length
 
-  // 🔹 Percentual de atingimento
+  // 🔹 Percentual
   const percentual = metaGeral
     ? Math.round((totalGeral / metaGeral) * 100)
     : 0
 
-  // 🔹 Resumo consolidado por Supervisor
+  // 🔹 Consolidação por Supervisor (cards + gráfico)
   const resumoPorSupervisor = Object.values(
-    dados.reduce((acc: any, d: any) => {
+    dados.reduce((acc: any, d) => {
       const sup = d.supervisor || "Sem Supervisor"
 
       if (!acc[sup]) {
@@ -112,12 +134,11 @@ export default function Dashboard() {
 
   return (
     <main className="p-6 space-y-6 bg-gray-50 min-h-screen">
-      {/* 🔽 Filtros */}
+      {/* 🔽 Filtro */}
       <Filtros
         supervisor={supervisorSelecionado}
         setSupervisor={setSupervisorSelecionado}
-        data={data}
-        setData={setData}
+        supervisores={supervisores}
       />
 
       {/* 🟦 Cards */}
