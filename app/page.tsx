@@ -40,3 +40,21 @@ export default function Dashboard() {
 useEffect(() => {
   getDashboardData().then(setDados)
 }, [])
+
+const totalGeral = dadosFiltrados.reduce(
+  (s, d) => s + (Number(d["Total geral"]) || 0),
+  0
+)
+
+const metaGeral = dadosFiltrados.reduce(
+  (s, d) => s + (Number(d["Meta"]) || 0),
+  0
+)
+
+const foraMeta = dadosFiltrados.filter(
+  d => Number(d["Total geral"]) < Number(d["Meta"])
+).length
+
+const percentual = metaGeral
+  ? Math.round((totalGeral / metaGeral) * 100)
+  : 0
