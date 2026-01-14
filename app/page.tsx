@@ -127,3 +127,5 @@ const resumoPorSupervisor = Object.values(
     ? Math.round((r.producao / r.meta) * 100)
     : 0
 }))
+
+import { SummarySupervisorCards } from "@/components/SummarySupervisorCards"
