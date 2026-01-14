@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react"
 import { SummaryCards } from "@/components/SummaryCards"
 import { SummarySupervisorCards } from "@/components/SummarySupervisorCards"
+import { ProducaoSupervisorChart } from "@/components/ProducaoSupervisorChart"
 import { ProducaoChart } from "@/components/ProducaoChart"
 import { TabelaTecnicos } from "@/components/TabelaTecnicos"
 import { Filtros } from "@/components/Filtros"
 import { getDashboardData } from "@/lib/api"
-import { ProducaoSupervisorChart } from "@/components/ProducaoSupervisorChart"
 
 export default function Dashboard() {
   // 🔹 Estados
@@ -57,7 +57,7 @@ export default function Dashboard() {
     ? Math.round((totalGeral / metaGeral) * 100)
     : 0
 
-  // 🔹 Cards consolidados por Supervisor (quando nenhum filtro está ativo)
+  // 🔹 Resumo consolidado por Supervisor
   const resumoPorSupervisor = Object.values(
     dados.reduce((acc: any, d: any) => {
       const sup = d["Supervisor"] || "Sem Supervisor"
@@ -109,9 +109,14 @@ export default function Dashboard() {
         setData={setData}
       />
 
-      {/* 🟦 Cards */}
+      {/* 🟦 Cards + Gráfico por Supervisor */}
       {!supervisorSelecionado ? (
-        <SummarySupervisorCards data={resumoPorSupervisor} />
+        <>
+          <SummarySupervisorCards data={resumoPorSupervisor} />
+
+          {/* 📊 Produção x Meta por Supervisor */}
+          <ProducaoSupervisorChart data={resumoPorSupervisor} />
+        </>
       ) : (
         <SummaryCards
           total={totalGeral}
@@ -122,7 +127,7 @@ export default function Dashboard() {
         />
       )}
 
-      {/* 📊 Gráfico Produção x Meta */}
+      {/* 📊 Gráfico Produção x Meta por Técnico */}
       <ProducaoChart data={dadosFiltrados} />
 
       {/* 📋 Tabela por Técnico */}
