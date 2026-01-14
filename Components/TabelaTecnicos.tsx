@@ -1,3 +1,5 @@
+"use client"
+
 export function TabelaTecnicos({ data }) {
   return (
     <div className="bg-white rounded-xl shadow overflow-auto">
