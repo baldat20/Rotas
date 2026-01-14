@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { SummaryCards } from "@/components/SummaryCards"
+import { SummarySupervisorCards } from "@/components/SummarySupervisorCards"
 import { ProducaoChart } from "@/components/ProducaoChart"
 import { TabelaTecnicos } from "@/components/TabelaTecnicos"
 import { Filtros } from "@/components/Filtros"
@@ -24,18 +25,16 @@ export default function Dashboard() {
 
   // 🔹 Filtro por supervisor
   const dadosFiltrados = supervisorSelecionado
-    ? dados.filter(
-        d => d["Supervisor"] === supervisorSelecionado
-      )
+    ? dados.filter(d => d["Supervisor"] === supervisorSelecionado)
     : dados
 
-  // 🔹 Cálculos — Produção
+  // 🔹 Produção total
   const totalGeral = dadosFiltrados.reduce(
     (s, d) => s + (Number(d["Total geral"]) || 0),
     0
   )
 
-  // 🔹 Cálculos — Meta (somente ATIVOS)
+  // 🔹 Meta total (somente ATIVOS)
   const metaGeral = dadosFiltrados.reduce(
     (s, d) =>
       s +
@@ -57,6 +56,40 @@ export default function Dashboard() {
     ? Math.round((totalGeral / metaGeral) * 100)
     : 0
 
+  // 🔹 Cards consolidados por Supervisor (quando nenhum filtro está ativo)
+  const resumoPorSupervisor = Object.values(
+    dados.reduce((acc: any, d: any) => {
+      const sup = d["Supervisor"] || "Sem Supervisor"
+
+      if (!acc[sup]) {
+        acc[sup] = {
+          supervisor: sup,
+          producao: 0,
+          meta: 0,
+          foraMeta: 0
+        }
+      }
+
+      acc[sup].producao += Number(d["Total geral"]) || 0
+
+      if (d["Status Técnico"] === "ATIVO") {
+        const metaTec = Number(d["Meta"]) || 0
+        acc[sup].meta += metaTec
+
+        if ((Number(d["Total geral"]) || 0) < metaTec) {
+          acc[sup].foraMeta += 1
+        }
+      }
+
+      return acc
+    }, {})
+  ).map((r: any) => ({
+    ...r,
+    percentual: r.meta
+      ? Math.round((r.producao / r.meta) * 100)
+      : 0
+  }))
+
   if (loading) {
     return (
       <main className="p-6">
@@ -75,14 +108,18 @@ export default function Dashboard() {
         setData={setData}
       />
 
-      {/* 🟦 Cards de resumo */}
-      <SummaryCards
-        total={totalGeral}
-        meta={metaGeral}
-        percentual={percentual}
-        foraMeta={foraMeta}
-        supervisor={supervisorSelecionado}
-      />
+      {/* 🟦 Cards */}
+      {!supervisorSelecionado ? (
+        <SummarySupervisorCards data={resumoPorSupervisor} />
+      ) : (
+        <SummaryCards
+          total={totalGeral}
+          meta={metaGeral}
+          percentual={percentual}
+          foraMeta={foraMeta}
+          supervisor={supervisorSelecionado}
+        />
+      )}
 
       {/* 📊 Gráfico Produção x Meta */}
       <ProducaoChart data={dadosFiltrados} />
@@ -92,40 +129,3 @@ export default function Dashboard() {
     </main>
   )
 }
-
-
-// 🔹 Agrupamento por Supervisor (cards consolidados)
-const resumoPorSupervisor = Object.values(
-  dados.reduce((acc: any, d: any) => {
-    const sup = d["Supervisor"] || "Sem Supervisor"
-
-    if (!acc[sup]) {
-      acc[sup] = {
-        supervisor: sup,
-        producao: 0,
-        meta: 0,
-        foraMeta: 0
-      }
-    }
-
-    acc[sup].producao += Number(d["Total geral"]) || 0
-
-    if (d["Status Técnico"] === "ATIVO") {
-      const metaTec = Number(d["Meta"]) || 0
-      acc[sup].meta += metaTec
-
-      if ((Number(d["Total geral"]) || 0) < metaTec) {
-        acc[sup].foraMeta += 1
-      }
-    }
-
-    return acc
-  }, {})
-).map((r: any) => ({
-  ...r,
-  percentual: r.meta
-    ? Math.round((r.producao / r.meta) * 100)
-    : 0
-}))
-
-import { SummarySupervisorCards } from "@/components/SummarySupervisorCards"
