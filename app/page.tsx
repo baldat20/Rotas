@@ -23,11 +23,29 @@ export default function Dashboard() {
   const [data, setData] = useState("")
 
   // 🔹 Busca dados da API
-  useEffect(() => {
-    getDashboardData()
-      .then(setDados)
-      .finally(() => setLoading(false))
-  }, [])
+ useEffect(() => {
+  getDashboardData()
+    .then((data) => {
+      const normalizado = data.map((d: any) => ({
+        ...d,
+        "Agendado": Number(d["Agendado"]) || 0,
+        "Chegada no Local": Number(d["Chegada no Local"]) || 0,
+        "Concluída": Number(d["Concluída"]) || 0,
+        "Despachado": Number(d["Despachado"]) || 0,
+        "Em deslocamento": Number(d["Em deslocamento"]) || 0,
+        "Em execução": Number(d["Em execução"]) || 0,
+        "Total geral": Number(d["Total geral"]) || 0,
+
+        // defaults para o dashboard não quebrar
+        "Meta": Number(d["Meta"]) || 0,
+        "Status Técnico": d["Status Técnico"] || "ATIVO"
+      }))
+
+      setDados(normalizado)
+    })
+    .finally(() => setLoading(false))
+}, [])
+
 
   // 🔹 Filtro por supervisor
   const dadosFiltrados = supervisorSelecionado
