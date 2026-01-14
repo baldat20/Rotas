@@ -2,31 +2,30 @@
 
 type Props = {
   supervisor: string
-  setSupervisor: (v: string) => void
-  data: string
-  setData: (v: string) => void
+  setSupervisor: (value: string) => void
+  supervisores: string[]
 }
 
-export function Filtros({ supervisor, setSupervisor, data, setData }: Props) {
+export function Filtros({
+  supervisor,
+  setSupervisor,
+  supervisores
+}: Props) {
   return (
-    <div className="flex flex-wrap gap-4">
+    <div className="flex flex-wrap gap-4 items-center">
       <select
         value={supervisor}
         onChange={e => setSupervisor(e.target.value)}
-        className="border rounded-lg p-2"
+        className="border rounded px-3 py-2 text-sm"
       >
         <option value="">Todos Supervisores</option>
-        <option value="FABIO">FABIO</option>
-        <option value="TIAGO">TIAGO</option>
-        <option value="JOSE">JOSE</option>
-      </select>
 
-      <input
-        type="date"
-        value={data}
-        onChange={e => setData(e.target.value)}
-        className="border rounded-lg p-2"
-      />
+        {supervisores.map(sup => (
+          <option key={sup} value={sup}>
+            {sup}
+          </option>
+        ))}
+      </select>
     </div>
   )
 }
