@@ -1,3 +1,5 @@
+"use client"
+
 type Props = {
   supervisor: string
   setSupervisor: (v: string) => void
