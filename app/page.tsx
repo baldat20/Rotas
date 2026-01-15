@@ -111,7 +111,6 @@ export default function Dashboard() {
 
   /* =======================
      FILTRO DE ROTA (META > 0)
-     👉 usado em tabela e gráficos
   ======================= */
   const dadosComRota = dadosFiltrados.filter(d => d.meta > 0)
 
@@ -138,7 +137,7 @@ export default function Dashboard() {
   ======================= */
   const resumoPorSupervisor: SupervisorResumo[] = Object.values(
     dados.reduce((acc: Record<string, SupervisorResumo>, d) => {
-      if (d.meta === 0) return acc // remove técnicos sem rota
+      if (d.meta === 0) return acc
 
       const sup = d.supervisor || "Sem Supervisor"
 
@@ -184,7 +183,7 @@ export default function Dashboard() {
   ======================= */
   return (
     <main
-      className="min-h-screen w-full space-y-8"
+      className="min-h-screen w-full flex flex-col"
       style={{ backgroundColor: "#8dc9eb" }}
     >
       {/* 🔵 TOPO */}
@@ -212,37 +211,40 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* 🟡 SUPERVISOR */}
-      {!supervisorSelecionado && (
-        <>
-          <PillTitle color="yellow">
-            Produção × Meta por Supervisor
-          </PillTitle>
+      {/* 🔽 CONTEÚDO FLEXÍVEL */}
+      <div className="flex-1 flex flex-col space-y-8">
+        {/* 🟡 SUPERVISOR */}
+        {!supervisorSelecionado && (
+          <>
+            <PillTitle color="yellow">
+              Produção × Meta por Supervisor
+            </PillTitle>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6">
-            <div className="bg-white rounded-xl p-4 shadow">
-              <SummarySupervisorCards data={resumoPorSupervisor} />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6">
+              <div className="bg-white rounded-xl p-4 shadow">
+                <SummarySupervisorCards data={resumoPorSupervisor} />
+              </div>
 
-            <div className="bg-white rounded-xl p-4 shadow">
-              <ProducaoSupervisorChart data={resumoPorSupervisor} />
+              <div className="bg-white rounded-xl p-4 shadow">
+                <ProducaoSupervisorChart data={resumoPorSupervisor} />
+              </div>
             </div>
+          </>
+        )}
+
+        {/* 🔴 TÉCNICO */}
+        <PillTitle color="red">
+          Produção × Meta por Técnico
+        </PillTitle>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 pb-6 flex-1">
+          <div className="bg-white rounded-xl p-4 shadow overflow-auto">
+            <TabelaTecnicos data={dadosComRota} />
           </div>
-        </>
-      )}
 
-      {/* 🔴 TÉCNICO */}
-      <PillTitle color="red">
-        Produção × Meta por Técnico
-      </PillTitle>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 pb-6">
-        <div className="bg-white rounded-xl p-4 shadow overflow-auto">
-          <TabelaTecnicos data={dadosComRota} />
-        </div>
-
-        <div className="bg-white rounded-xl p-4 shadow">
-          <StatusBarChart data={dadosComRota} />
+          <div className="bg-white rounded-xl p-4 shadow flex flex-col flex-1">
+            <StatusBarChart data={dadosComRota} />
+          </div>
         </div>
       </div>
     </main>
