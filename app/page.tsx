@@ -103,23 +103,29 @@ export default function Dashboard() {
   ).sort()
 
   /* =======================
-     FILTRO
+     FILTRO POR SUPERVISOR
   ======================= */
   const dadosFiltrados = supervisorSelecionado
     ? dados.filter(d => d.supervisor === supervisorSelecionado)
     : dados
 
   /* =======================
+     FILTRO DE ROTA (META > 0)
+     👉 usado em tabela e gráficos
+  ======================= */
+  const dadosComRota = dadosFiltrados.filter(d => d.meta > 0)
+
+  /* =======================
      KPIs
   ======================= */
-  const totalGeral = dadosFiltrados.reduce((s, d) => s + d.total, 0)
+  const totalGeral = dadosComRota.reduce((s, d) => s + d.total, 0)
 
-  const metaGeral = dadosFiltrados.reduce(
+  const metaGeral = dadosComRota.reduce(
     (s, d) => s + (d.status === "ATIVO" ? d.meta : 0),
     0
   )
 
-  const foraMeta = dadosFiltrados.filter(
+  const foraMeta = dadosComRota.filter(
     d => d.status === "ATIVO" && d.total < d.meta
   ).length
 
@@ -132,6 +138,8 @@ export default function Dashboard() {
   ======================= */
   const resumoPorSupervisor: SupervisorResumo[] = Object.values(
     dados.reduce((acc: Record<string, SupervisorResumo>, d) => {
+      if (d.meta === 0) return acc // remove técnicos sem rota
+
       const sup = d.supervisor || "Sem Supervisor"
 
       if (!acc[sup]) {
@@ -165,7 +173,7 @@ export default function Dashboard() {
   ======================= */
   if (loading) {
     return (
-      <main className="p-6">
+      <main className="min-h-screen flex items-center justify-center">
         <p>Carregando dashboard...</p>
       </main>
     )
@@ -176,12 +184,12 @@ export default function Dashboard() {
   ======================= */
   return (
     <main
-      className="min-h-screen p-6 space-y-8"
+      className="min-h-screen w-full space-y-8"
       style={{ backgroundColor: "#8dc9eb" }}
     >
       {/* 🔵 TOPO */}
       <div
-        className="rounded-xl p-6 shadow space-y-4"
+        className="p-6 shadow space-y-4"
         style={{ backgroundColor: "#bfe4f4" }}
       >
         <div className="flex items-center gap-4">
@@ -211,7 +219,7 @@ export default function Dashboard() {
             Produção × Meta por Supervisor
           </PillTitle>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6">
             <div className="bg-white rounded-xl p-4 shadow">
               <SummarySupervisorCards data={resumoPorSupervisor} />
             </div>
@@ -228,13 +236,13 @@ export default function Dashboard() {
         Produção × Meta por Técnico
       </PillTitle>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 pb-6">
         <div className="bg-white rounded-xl p-4 shadow overflow-auto">
-          <TabelaTecnicos data={dadosFiltrados} />
+          <TabelaTecnicos data={dadosComRota} />
         </div>
 
         <div className="bg-white rounded-xl p-4 shadow">
-          <StatusBarChart data={dadosFiltrados} />
+          <StatusBarChart data={dadosComRota} />
         </div>
       </div>
     </main>
