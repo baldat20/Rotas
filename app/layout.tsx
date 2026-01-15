@@ -1,3 +1,5 @@
+import "./globals.css"
+
 export const metadata = {
   title: "Dashboard PG",
   description: "Produção x Meta"
@@ -10,7 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className="bg-gray-50">
+      <body className="w-full min-h-screen m-0 p-0 overflow-x-hidden">
         {children}
       </body>
     </html>
