@@ -32,39 +32,41 @@ export function TabelaTecnicos({ data }: { data: Tecnico[] }) {
         </thead>
 
         <tbody>
-          {data.map((t) => {
-            const rotaCompleta = t.total >= t.meta
+          {data
+            .filter(t => t.meta > 0)
+            .map((t) => {
+              const rotaCompleta = t.total >= t.meta
 
-            return (
-              <tr key={t.tecnico} className="border-t text-center">
-                <td className="font-medium text-left px-2 py-1">
-                  {t.tecnico}
-                </td>
+              return (
+                <tr key={t.tecnico} className="border-t text-center">
+                  <td className="font-medium text-left px-2 py-1">
+                    {t.tecnico}
+                  </td>
 
-                <td>{t.agendado}</td>
-                <td>{t.chegada}</td>
-                <td>{t.concluida}</td>
-                <td>{t.despachado}</td>
-                <td>{t.deslocamento}</td>
-                <td>{t.execucao}</td>
+                  <td>{t.agendado}</td>
+                  <td>{t.chegada}</td>
+                  <td>{t.concluida}</td>
+                  <td>{t.despachado}</td>
+                  <td>{t.deslocamento}</td>
+                  <td>{t.execucao}</td>
 
-                <td className="font-bold">{t.total}</td>
-                <td>{t.meta}</td>
+                  <td className="font-bold">{t.total}</td>
+                  <td>{t.meta}</td>
 
-                <td className="font-semibold">
-                  {rotaCompleta ? (
-                    <span className="text-green-700">
-                      ROTA COMPLETA
-                    </span>
-                  ) : (
-                    <span className="text-red-700">
-                      NECESSÁRIO ENCAIXE
-                    </span>
-                  )}
-                </td>
-              </tr>
-            )
-          })}
+                  <td className="font-semibold">
+                    {rotaCompleta ? (
+                      <span className="text-green-700">
+                        ROTA COMPLETA
+                      </span>
+                    ) : (
+                      <span className="text-red-700">
+                        NECESSÁRIO ENCAIXE
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
         </tbody>
       </table>
     </div>
